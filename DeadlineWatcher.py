@@ -17,10 +17,18 @@ bot = telebot.TeleBot(config.TOKEN)
 
 deadline_data = {}
 
+"""deadline_data является словарём, хранящим данные пользователей о их дедлайнах вида:
+    deadline_data[message.chat.id] - тип ожидаемого сообщения по константам строк 7-14
+    deadline_data[message.chat.idtdeadline_day] - день дедлайна
+    deadline_data[message.chat.idtdeadline_month] - месяц дедлайна
+    deadline_data[message.chat.idtdeadline_len] - длина задания
+    deadline_data[message.chat.idttype] - тип задания
+"""
+
 @bot.message_handler(commands=['start'])
 def start_message(message):
 
-    """Эта функция является стартовой для пользователя и создаёт интерфейс"""
+    """Эта функция является стартовой для пользователя и создаёт интерфейс, message - получаемые данные с телеграма"""
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=3)
     buttonget = types.KeyboardButton('Установить дедлайн')
@@ -33,7 +41,7 @@ def start_message(message):
 
 def get_deadline_date(message):
     
-    """Данная функция запрашивает у пользователя месяц дедлайна, изменяя состояние бота на получение месяца"""
+    """Данная функция запрашивает у пользователя месяц дедлайна, изменяя состояние бота на получение месяца, message - получаемые данные с телеграма"""
 
     deadline_data[message.chat.id] = DATE_MONTH
     bot.send_message(message.chat.id, 'Позвольте узнать, к какому месяцу вы хотите закончить работу?\nВведите цифру от 1 до 12')
@@ -41,7 +49,7 @@ def get_deadline_date(message):
 @bot.message_handler(commands=['help'])
 def help(message):
 
-    """Функция help нужна для пояснения функций кнопок"""
+    """Функция help нужна для пояснения функций кнопок, message - получаемые данные с телеграма"""
 
     bot.send_message(message.chat.id, 'Используйте команду "Установить дедлайн", если вы хотите изменить размер дедлайна или его дату')
     bot.send_message(message.chat.id, 'Используйте команду "Посмотреть дедлайн", если вы установили дедлайн и хотите узнать прогресс завершения работы')
@@ -49,14 +57,14 @@ def help(message):
     
 def error(message):
 
-    """Функция для непредвиденных ошибок"""
+    """Функция для непредвиденных ошибок, message - получаемые данные с телеграма"""
 
     bot.send_message(message.chat.id, 'Произошла непредвиденная ошибка')
 
 @bot.message_handler(content_types=["text"])
 def text(message):
 
-    """Данная функция обрабатывает состояние программы и включает соответствующую функцию, в зависимости от полученной информации"""
+    """Данная функция обрабатывает состояние программы и включает соответствующую функцию, в зависимости от полученной информации, message - получаемые данные с телеграма"""
 
     text_received = message.text
     
@@ -79,7 +87,7 @@ def text(message):
 
 def work_check(message):
 
-    """Данная функция запрашивает выполненную работу"""
+    """Данная функция запрашивает выполненную работу, message - получаемые данные с телеграма"""
 
     if deadline_data[f'{message.chat.id}deadline_len']!=0:
         if deadline_data[f'{message.chat.id}deadline_type']==DEADLINE_TASKS:
@@ -94,7 +102,7 @@ def work_check(message):
 
 def received_deadline_work(message):
     
-    """Данная функция обрабатывает полученную работу и изменяет количество оставшейся работы"""
+    """Данная функция обрабатывает полученную работу и изменяет количество оставшейся работы, message - получаемые данные с телеграма"""
 
     try:
         text_received = message.text
@@ -127,7 +135,7 @@ def received_deadline_work(message):
 
 def count_words(string):
 
-    """Данная функция считает слова в курсовой работе студента"""
+    """string - работа студента, возвращаемая переменная words является счётчиком по количеству слов, message - получаемые данные с телеграма"""
 
     isinword = 0
     words = 0
@@ -141,7 +149,7 @@ def count_words(string):
 
 def received_deadline_month(message):
     
-    """Данная функция получает месяц дедлайна и обрабатывает значение"""
+    """Данная функция получает месяц дедлайна и обрабатывает значение, message - получаемые данные с телеграма"""
 
     try:
         text_received = message.text
@@ -157,7 +165,7 @@ def received_deadline_month(message):
 
 def received_deadline_day(message):
 
-    """Данная функция получает день дедлайна и обрабатывает значение"""
+    """Данная функция получает день дедлайна и обрабатывает значение, message - получаемые данные с телеграма"""
 
     try:
         text_received = message.text
@@ -174,7 +182,9 @@ def received_deadline_day(message):
 
 def received_deadline_type(message):
 
-    """Конструкция реализации кнопок и обработки данных взята с pocketadmin.tech, статья о Telebot"""
+    """Данная функция получает сообщение пользователя и предлагает ему 3 варианта ответа на вопрос об измерении, message - получаемые данные с телеграма"""
+
+    #Конструкция реализации кнопок и обработки данных взята с pocketadmin.tech, статья о Telebot
     deadline_data[message.chat.id] = None
     markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Задания', callback_data=DEADLINE_TASKS))
@@ -185,7 +195,7 @@ def received_deadline_type(message):
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):    
 
-    """Слушатель нажатий кнопок функции received_deadline_type()"""
+    """Слушатель нажатий кнопок функции received_deadline_type(), call - возвращаемые данные с кнопки метода received_deadline_type()"""
 
     answer = ''
     if call.data == '11':
@@ -206,7 +216,7 @@ def query_handler(call):
 
 def received_deadline_length(message):
     
-    """Данная функция получает длину дедлайна и устанавливает в словарь"""
+    """Данная функция получает длину дедлайна и устанавливает в словарь, message - получаемые данные с телеграма"""
 
     try:
         text_received = message.text
@@ -223,7 +233,7 @@ def received_deadline_length(message):
 
 def deadline_check(message):
 
-    """Данная функция реализует кнопку Проверить дедлайн"""
+    """Данная функция реализует кнопку Проверить дедлайн, message - получаемые данные с телеграма"""
 
     now = datetime.datetime.now()
     userid = message.chat.id
